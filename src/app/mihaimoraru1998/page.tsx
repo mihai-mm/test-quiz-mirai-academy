@@ -66,6 +66,21 @@ export default function AdminPage() {
         }
     }
 
+    const handleDeleteResult = async (id: string) => {
+        if (!confirm('Sei sicuro di voler eliminare questo risultato studente?')) return
+
+        setLoading(true)
+        try {
+            const { error } = await supabase.from('student_results').delete().eq('id', id)
+            if (error) throw error
+            fetchResults()
+        } catch (error: any) {
+            alert(`Errore nell'eliminazione del risultato: ${error.message}`)
+        } finally {
+            setLoading(false)
+        }
+    }
+
     const handleUpload = async (e: React.FormEvent) => {
         e.preventDefault()
         if (uploadMode === 'pdf' && !file) return
@@ -204,15 +219,25 @@ export default function AdminPage() {
                                         <span className="subtitle">Quiz: {result.quizzes?.title}</span>
                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '12px' }}>
                                             <strong className="score-badge">Punteggio: {result.score}/{result.total_questions}</strong>
-                                            <a
-                                                href={`/quiz/${result.quiz_id}/results?resultId=${result.id}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="secondary-button"
-                                                style={{ textDecoration: 'none' }}
-                                            >
-                                                Vedi Risultati Dettagliati
-                                            </a>
+                                            <div style={{ display: 'flex', gap: '12px' }}>
+                                                <a
+                                                    href={`/quiz/${result.quiz_id}/results?resultId=${result.id}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="secondary-button"
+                                                    style={{ textDecoration: 'none', padding: '8px 16px', fontSize: '0.9rem' }}
+                                                >
+                                                    Dettagli
+                                                </a>
+                                                <button
+                                                    className="delete-button"
+                                                    onClick={() => handleDeleteResult(result.id)}
+                                                    disabled={loading}
+                                                    style={{ padding: '8px 16px', fontSize: '0.9rem' }}
+                                                >
+                                                    Elimina
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </li>
