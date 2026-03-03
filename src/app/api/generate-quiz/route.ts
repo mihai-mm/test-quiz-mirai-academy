@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { supabase } from '@/lib/supabase'
-const pdfParse = require('pdf-parse')
 
 export const dynamic = 'force-dynamic';
 
@@ -18,7 +17,8 @@ export async function POST(req: NextRequest) {
             extractedText = rawText
             quizTitle = `Quiz da Testo (${new Date().toLocaleDateString()})`
         } else if (file) {
-            // Read the PDF file into a buffer
+            // Dynamic import to avoid DOMMatrix crash on Vercel serverless
+            const pdfParse = (await import('pdf-parse')).default
             const arrayBuffer = await file.arrayBuffer()
             const buffer = Buffer.from(arrayBuffer)
 
