@@ -3,9 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import { supabase } from '@/lib/supabase'
 const pdfParse = require('pdf-parse')
 
-// Next.js Route Config for Node.js APIs
-export const maxDuration = 60; // Max execution time 60s
-export const dynamic = 'force-dynamic'; // Prevent caching
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
     try {
