@@ -7,36 +7,17 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
     try {
         const formData = await req.formData()
-        const file = formData.get('file') as File | null
         const rawText = formData.get('rawText') as string | null
 
         let extractedText = ''
         let quizTitle = ''
 
-        if (rawText) {
-            extractedText = rawText
-            quizTitle = `Quiz da Testo (${new Date().toLocaleDateString()})`
-        } else if (file) {
-            // Dynamic import to avoid DOMMatrix crash on Vercel serverless
-            const pdfParse = (await import('pdf-parse')).default
-            const arrayBuffer = await file.arrayBuffer()
-            const buffer = Buffer.from(arrayBuffer)
-
-            try {
-                const pdfData = await pdfParse(buffer)
-                extractedText = pdfData.text
-                quizTitle = `Quiz su ${file.name}`
-            } catch (parseError) {
-                console.error('PDF Parse Error:', parseError)
-                return NextResponse.json({ error: 'Impossibile estrarre il testo dal PDF.' }, { status: 400 })
-            }
-        } else {
-            return NextResponse.json({ error: 'Nessun file o testo fornito' }, { status: 400 })
+        if (!rawText || !rawText.trim()) {
+            return NextResponse.json({ error: 'Nessun testo fornito.' }, { status: 400 })
         }
 
-        if (!extractedText.trim()) {
-            return NextResponse.json({ error: 'Nessun testo leggibile trovato.' }, { status: 400 })
-        }
+        extractedText = rawText
+        quizTitle = `Quiz da Testo (${new Date().toLocaleDateString()})`
 
         // Initialize Gemini AI
         const apiKey = process.env.GEMINI_API_KEY
@@ -101,7 +82,7 @@ export async function POST(req: NextRequest) {
         // Insert Quiz into Supabase
         const { data: quizData, error: quizError } = await supabase
             .from('quizzes')
-            .insert({ title: quizTitle, source_pdf_name: file?.name || 'Text Input' })
+            .insert({ title: quizTitle, source_pdf_name: 'Text Input' })
             .select('id')
             .single()
 
