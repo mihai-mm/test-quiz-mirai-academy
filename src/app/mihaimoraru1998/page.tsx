@@ -106,11 +106,23 @@ export default function AdminPage() {
                 setRawText('')
                 fetchQuizzes()
             } else {
-                const errorData = await response.json()
-                alert(`Errore: ${errorData.error}`)
+                let errorMessage = `Errore ${response.status}`
+                try {
+                    const errorData = await response.json()
+                    errorMessage = errorData.error || errorMessage
+                } catch {
+                    // Risposta non-JSON (es. timeout Vercel restituisce HTML)
+                    if (response.status === 504) {
+                        errorMessage = 'Timeout del server. Il testo potrebbe essere troppo lungo. Prova con un testo più corto.'
+                    } else {
+                        errorMessage = `Errore ${response.status}: ${response.statusText}`
+                    }
+                }
+                alert(`Errore: ${errorMessage}`)
             }
         } catch (error) {
-            alert('Si è verificato un errore durante l\'upload.')
+            console.error('Fetch error:', error)
+            alert('Errore di rete. Controlla la connessione e riprova.')
         } finally {
             setLoading(false)
         }

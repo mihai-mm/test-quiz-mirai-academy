@@ -47,8 +47,7 @@ export async function POST(req: NextRequest) {
         }
 
         const genAI = new GoogleGenerativeAI(apiKey)
-        // Switch to gemini-3-flash-preview as per user request and official name
-        const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' })
+        const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite-preview' })
 
         const prompt = `
       Sei un docente esperto e pedagogo di alto livello. Il tuo obiettivo è creare un quiz che non si limiti a testare la memoria, 
